@@ -10,7 +10,8 @@ internal class Program
         Stopwatch stopwatch = new();
         stopwatch.Start();
 
-        decimal total = 0;
+        #region C1
+        //decimal total = 0;
 
         // It took : 2970ms to run
         //for (int i = 0; i < 100; i++)
@@ -36,16 +37,28 @@ internal class Program
         //});
 
         // It took : 750ms to run
+        //Parallel.For(0, 100, (i) =>
+        //{
+        //    var result = Compute(i);
+        //    lock (_syncRoot)
+        //    {
+        //        total += result;
+
+        //    }
+        //}); 
+        #endregion
+
+        #region C2
+        int total = 0;
+
+        // It took : 600ms to run
         Parallel.For(0, 100, (i) =>
         {
             var result = Compute(i);
-            lock (_syncRoot)
-            {
-                total += result;
-
-            }
+            Interlocked.Add(ref total, (int)result);
         });
 
+        #endregion
 
         Console.WriteLine(total);
         Console.WriteLine($"It took: {stopwatch.ElapsedMilliseconds}ms to run");
