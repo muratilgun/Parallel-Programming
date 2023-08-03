@@ -49,18 +49,39 @@ internal class Program
         #endregion
 
         #region C2
-        int total = 0;
+        //int total = 0;
 
-        // It took : 600ms to run
-        Parallel.For(0, 100, (i) =>
-        {
-            var result = Compute(i);
-            Interlocked.Add(ref total, (int)result);
-        });
+        //// It took : 600ms to run
+        //Parallel.For(0, 100, (i) =>
+        //{
+        //    var result = Compute(i);
+        //    Interlocked.Add(ref total, (int)result);
+        //});
 
         #endregion
 
-        Console.WriteLine(total);
+        var cancellationTokenSource = new CancellationTokenSource();
+        cancellationTokenSource.CancelAfter(2000);
+
+        var parallelOptions = new ParallelOptions
+        {
+            CancellationToken = cancellationTokenSource.Token,
+            MaxDegreeOfParallelism = 1
+        };
+        int total = 0;
+        try
+        {
+            Parallel.For(0, 100, parallelOptions, (i) =>
+         {
+             Interlocked.Add(ref total, (int)Compute(i));
+         });
+        }
+        catch (OperationCanceledException ex)
+        {
+            Console.WriteLine("Cancellation Requested");
+        }
+
+        Console.WriteLine($"Total = {total}");
         Console.WriteLine($"It took: {stopwatch.ElapsedMilliseconds}ms to run");
         Console.ReadLine();
     }
